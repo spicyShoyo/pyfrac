@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <title>Bootstrap Example</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <link rel="stylesheet" type="text/css" href="{% static "imageselect/css/imgareaselect-default.css" %}" />
+      <script type="text/javascript" src="{% static "imageselect/scripts/jquery.imgareaselect.pack.js" %}"></script>
+      <style>
+         /* Set height of the grid so .sidenav can be 100% (adjust if needed) */
+         .row.content {height: 1500px}
+         /* Set gray background color and 100% height */
+         .sidenav {
+         background-color: #f1f1f1;
+         height: 100%;
+         }
+         /* Set black background color, white text and some padding */
+         footer {
+         background-color: #555;
+         color: white;
+         padding: 15px;
+         }
+         /* On small screens, set height to 'auto' for sidenav and grid */
+         @media screen and (max-width: 767px) {
+         .sidenav {
+         height: auto;
+         padding: 15px;
+         }
+         .row.content {height: auto;}
+         }
+
+         .vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+      </style>
+   </head>
+   <body>
+      <nav class="navbar navbar-inverse">
+         <a class="navbar-brand" href="#">PyFrac</a>
+      </nav>
+      <div class="container-fluid">
+         <div class="row content">
+            <div class="col-sm-2 sidenav">
+               <h4>Menu</h4>
+               <ul class="nav nav-pills nav-stacked">
+                  <li class="active"><a href="#section1">Query</a></li>
+                  <li><a href="#section2">Saved</a></li>
+               </ul>
+               <br>
+               <script>
+                  $(document).ready(function() {
+                     var frm = $("#queryfrac");
+                     frm.submit(function(ev) {
+                         var paramObj = {};
+                         $.each(frm.serializeArray(), function(_, kv) {
+                             paramObj[kv.name] = kv.value;
+                         });
+                         console.log(paramObj);
+                         $('#fracimg').html("");
+                         $.post("http://localhost:8000/frac/getfrac/",
+                             paramObj,
+                             function(data, status) {
+                                 if(status == "success") {
+                                     $('#fracimg').html(data);
+                                 }else {
+                                     alert("Sth wrong with the server")
+                                 }
+                             });
+                         ev.preventDefault();
+                     });
+                  });
+               </script>
+               <form id="queryfrac" method="post">
+                  {%csrf_token %}
+                  <div class="form-group">
+                     <label>Type: </label>
+                     <select name="fractype">
+                        <option value="MandelbrotSequential">Mandelbrot Sequential</option>
+                        <option value="Mandelbrot" selected>Mandelbrot</option>
+                        <option value="Julia">Julia</option>
+                     </select>
+                  </div>
+                  <div class="form-group">
+                     <label>Width: </label>
+                     <input type="number" name="xres"
+                        min="100" max="2000" step="100" value="100">
+                  </div>
+                  <div class="form-group">
+                     <label>Height: </label>
+                     <input type="number" name="yres"
+                        min="100" max="2000" step="100" value="100">
+                  </div>
+                  <div class="form-group">
+                     <label>X Min: </label>
+                     <input type="number" name="xmin"
+                        min="-2" max="0" step="0.1" value="-1">
+                  </div>
+                  <div class="form-group">
+                     <label>X Max: </label>
+                     <input type="number" name="xmax"
+                        min="0" max="2" step="0.1" value="1">
+                  </div>
+                  <div class="form-group">
+                     <label>Y Min: </label>
+                     <input type="number" name="ymin"
+                        min="-2" max="0" step="0.1" value="-1">
+                  </div>
+                  <div class="form-group">
+                     <label>Y Max: </label>
+                     <input type="number" name="ymax"
+                        min="0" max="2" step="0.1" value="1">
+                  </div>
+                  <button type="submit" class="btn btn-success">Submit</button>
+               </form>
+            </div>
+            <div align="right">
+
+                <div id="fracimg">
+
+              </div>
+            </div>
+         </div>
+      </div>
+      <footer class="container-fluid">
+         <p>Footer Text</p>
+      </footer>
+   </body>
+</html>

@@ -1,0 +1,145 @@
+{% load static %}
+{% static "" as baseUrl %}
+<script type="text/javascript" src="{% static "imageselect/scripts/jquery.imgareaselect.pack.js" %}"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<script type="text/javascript">
+function getX(xVal) {
+  var xres = parseFloat($('#oldxres').val());
+  var xmin = parseFloat($('#oldxmin').val());
+  var xmax = parseFloat($('#oldxmax').val());
+  var res = xmin + xVal / xres * (xmax - xmin);
+  return res;
+}
+
+function getY(yVal) {
+  yVal = parseFloat($('#oldyres').val()) - yVal;
+  var yres = parseFloat($('#oldyres').val());
+  var ymin = parseFloat($('#oldymin').val());
+  var ymax = parseFloat($('#oldymax').val());
+  var res = ymin + yVal / yres * (ymax - ymin);
+  return res;
+}
+
+function round(val) {
+  return Math.round(val * 100) / 100
+}
+
+function preview(img, selection) {
+    if (!selection.width || !selection.height)
+        return;
+
+    var x1 = getX(selection.x1);
+    var x2 = getX(selection.x2);
+    var y1 = getY(selection.y2);
+    var y2 = getY(selection.y1);
+    var w = selection.width / parseFloat($('#oldxres').val());
+    var h = selection.width / parseFloat($('#oldyres').val());
+
+    $('#x1v').val(x1);
+    $('#y1v').val(y1);
+    $('#x2v').val(x2);
+    $('#y2v').val(y2);
+
+    x1 = round(x1)
+    y1 = round(y1)
+    x2 = round(x2)
+    y2 = round(y2)
+    w = round(w)
+    h = round(h)
+
+    $('#x1').text(x1);
+    $('#y1').text(y1);
+    $('#x2').text(x2);
+    $('#y2').text(y2);
+    $('#w').text(w);
+    $('#h').text(h);
+}
+
+$(function () {
+    var ias = $('#photo').imgAreaSelect({ aspectRatio: '1:1', handles: true,
+        fadeSpeed: 200, onSelectChange: preview, instance: true});
+    ias.cancelSelection();
+});
+</script>
+<form id="fracinfo" method="post">
+   <input type="hidden" name="x_res" id="oldxres" value="{{x_res}}">
+   <input type="hidden" name="y_res" id="oldyres" value="{{y_res}}">
+   <input type="hidden" name="x_min" id="oldxmin" value="{{x_min}}">
+   <input type="hidden" name="y_min" id="oldymin" value="{{y_min}}">
+   <input type="hidden" name="x_max" id="oldxmax" value="{{x_max}}">
+   <input type="hidden" name="y_max" id="oldymax" value="{{y_max}}">
+</form>
+
+<div class="col-sm-8" align="center">
+    <div class="frame" style="margin: 0 0.3em; width: 300px; height: 300px;">
+      <img id="photo" src="{{ baseUrl }}{{img_src}}">
+    </div>
+  </div>
+
+
+<div class="col-sm-2" align="right">
+  <div class="sidebar-nav-fixed pull-right affix">
+
+                <div class="well">
+                  <script>
+                     $(document).ready(function() {
+                        var zoomFrac = $("#zoomfrac");
+                        zoomFrac.submit(function(ev) {
+                            var paramObj = {};
+                            $.each(zoomFrac.serializeArray(), function(_, kv) {
+                                paramObj[kv.name] = kv.value;
+                            });
+                            $('#fracimg').html("");
+                            $.post("http://localhost:8000/frac/getfrac/",
+                                paramObj,
+                                function(data, status) {
+                                    if(status == "success") {
+                                        $('#fracimg').html(data);
+                                    }else {
+                                        alert("Sth wrong with the server")
+                                    }
+                                });
+                            ev.preventDefault();
+                        });
+                     });
+                  </script>
+                  <form id="zoomfrac" method="post">
+                     <input type="hidden" name="csrfmiddlewaretoken" value="{{token}}">
+                     <input type="hidden" name="fractype" value="{{frac_type}}">
+                  <div class="form-group">
+                     <label>Width: </label>
+                     <label id="w">-</label>
+                     <input type="hidden" name="xres" id="wv" value="{{x_res}}">
+                  </div>
+                  <div class="form-group">
+                     <label>Height: </label>
+                     <label id="h">-</label>
+                     <input type="hidden" name="yres" id="hv" value="{{y_res}}">
+                  </div>
+                  <div class="form-group">
+                     <label>X Min: </label>
+                     <label id="x1">-</label>
+                     <input type="hidden" name="xmin" id="x1v" value="-1">
+                  </div>
+                  <div class="form-group">
+                     <label>X Max: </label>
+                     <label id="x2">-</label>
+                     <input type="hidden" name="xmax" id="x2v" value="1">
+                  </div>
+                  <div class="form-group">
+                     <label>Y Min: </label>
+                     <label id="y1">-</label>
+                     <input type="hidden" name="ymin" id="y1v" value="-1">
+                  </div>
+                  <div class="form-group">
+                     <label>Y Max: </label>
+                     <label id="y2">-</label>
+                     <input type="hidden" name="ymax" id="y2v" value="1">
+                  </div>
+                  <button type="submit" class="btn btn-success">Zoom!</button>
+                  </form>
+
+</div>
+</div>
+</div>
