@@ -1,11 +1,11 @@
 from django.http import HttpResponse
 from django.template import loader
 from django.template.loader import render_to_string
-from julia import Julia
+from juliasuper import JuliaSuper
 from mandelbrotsequential import MandelbrotSequential
 from mandelbrotsuper import MandelbrotSuper
 
-FRAC_TYPE_DIC = {"Julia": Julia, "MandelbrotSequential": MandelbrotSequential, "Mandelbrot": MandelbrotSuper}
+FRAC_TYPE_DIC = {"Julia": JuliaSuper, "MandelbrotSequential": MandelbrotSequential, "Mandelbrot": MandelbrotSuper}
 
 
 def index(request):

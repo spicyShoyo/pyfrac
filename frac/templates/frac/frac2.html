@@ -61,7 +61,8 @@
                          $.each(frm.serializeArray(), function(_, kv) {
                              paramObj[kv.name] = kv.value;
                          });
-                         console.log(paramObj);
+                         paramObj["xres"] = paramObj["res"];
+                         paramObj["yres"] = paramObj["res"];
                          $('#fracimg').html("");
                          $.post("http://localhost:8000/frac/getfrac/",
                              paramObj,
@@ -87,13 +88,8 @@
                      </select>
                   </div>
                   <div class="form-group">
-                     <label>Width: </label>
-                     <input type="number" name="xres"
-                        min="100" max="2000" step="100" value="100">
-                  </div>
-                  <div class="form-group">
-                     <label>Height: </label>
-                     <input type="number" name="yres"
+                     <label>Resolution: </label>
+                     <input type="number" name="res"
                         min="100" max="2000" step="100" value="100">
                   </div>
                   <div class="form-group">

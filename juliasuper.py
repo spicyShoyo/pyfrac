@@ -6,13 +6,13 @@ import uuid
 import os
 os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1' #output warnings
 
-MAX_ITER = 50
+MAX_ITER = 100
 RGB_LEN = 3
 
-class MandelbrotSuper:
+class JuliaSuper:
     def __init__(self, row_res, col_res, x_min, x_max, y_min, y_max):
         '''
-        Init mandelbrot
+        Init julia
         :param row_res: the height of the output image
         :param col_res: the width of the output image
         :param x_min: the x coordinate of the left most pixel
@@ -42,7 +42,7 @@ class MandelbrotSuper:
 
     def solve(self):
         '''
-        Solve the mandelbrot set
+        Solve the julia set
         :return: none
         '''
         self.img = np.zeros(RGB_LEN * self.row_length * self.col_length).astype(np.int32)
@@ -68,11 +68,11 @@ class MandelbrotSuper:
             int gid = get_global_id(0);
             int cid = gid % width;
             int rid = width - gid / width - 1;
-            double zr = 0;
-            double zi = 0;
+            double zr = (info_g[0] + info_g[2] * cid);
+            double zi = (info_g[1] + info_g[3] * rid);
 
-            double cr = (info_g[0] + info_g[2] * cid);
-            double ci = (info_g[1] + info_g[3] * rid);
+            double cr = -0.70176;
+            double ci = -0.3842;
 
             bool over = 0;  //over
             bool assigned = 0;
@@ -116,7 +116,7 @@ class MandelbrotSuper:
         prg.sum(queue, (self.img.shape[0] // RGB_LEN,), None, res_g, info_g)
         #copy back result
         cl.enqueue_copy(queue, self.img, res_g)
-
+        
 
     def save_img(self):
         '''
