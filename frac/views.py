@@ -1,11 +1,11 @@
 from django.http import HttpResponse
 from django.template import loader
 from django.template.loader import render_to_string
-from juliasuper import JuliaSuper
-from mandelbrotsequential import MandelbrotSequential
-from mandelbrotsuper import MandelbrotSuper
+from julia import Julia
+from mandelbrot import Mandelbrot
+from demo import Demo
 
-FRAC_TYPE_DIC = {"Julia": JuliaSuper, "MandelbrotSequential": MandelbrotSequential, "Mandelbrot": MandelbrotSuper}
+FRAC_TYPE_DIC = {"Julia": Julia, "Mandelbrot": Mandelbrot, "Demo": Demo}
 
 
 def index(request):
@@ -23,7 +23,7 @@ def query(request):
     :param request: http request
     :return: http response
     '''
-    template = loader.get_template('frac/frac2.html')
+    template = loader.get_template('frac/frac.html')
     project_list = []
     context = {
         'project_list': project_list,
@@ -55,7 +55,9 @@ def getfrac(request):
     x_max = float(request.POST["xmax"])
     y_min = float(request.POST["ymin"])
     y_max = float(request.POST["ymax"])
-    a = FRAC_TYPE_DIC[frac_type](x_res, y_res, x_min, x_max, y_min, y_max)
+    cr = float(request.POST["cr"])
+    ci = float(request.POST["ci"])
+    a = FRAC_TYPE_DIC[frac_type](x_res, y_res, x_min, x_max, y_min, y_max, cr, ci)
     a.solve()
     fn = a.save_img()
 
@@ -69,6 +71,8 @@ def getfrac(request):
         'x_max': x_max,
         'y_min': y_min,
         'y_max': y_max,
+        'cr': cr,
+        'ci': ci,
     }
 
     return getfrac_ajax(context)

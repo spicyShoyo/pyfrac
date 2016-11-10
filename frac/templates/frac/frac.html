@@ -32,12 +32,11 @@
          }
          .row.content {height: auto;}
          }
-
          .vcenter {
-    display: inline-block;
-    vertical-align: middle;
-    float: none;
-}
+         display: inline-block;
+         vertical-align: middle;
+         float: none;
+         }
       </style>
    </head>
    <body>
@@ -77,15 +76,39 @@
                      });
                   });
                </script>
+               <script>
+                  function changeFunc() {
+                    var selectBox = document.getElementById("fracselect");
+                    var selectedValue = selectBox.options[selectBox.selectedIndex].value;
+                    if (selectedValue == "Julia") {
+                      $('#cr').show();
+                      $('#ci').show();
+                    } else {
+                      $('#cr').hide();
+                      $('#ci').hide();
+                    }
+
+                  }
+               </script>
                <form id="queryfrac" method="post">
                   {%csrf_token %}
                   <div class="form-group">
                      <label>Type: </label>
-                     <select name="fractype">
-                        <option value="MandelbrotSequential">Mandelbrot Sequential</option>
+                     <select id="fracselect" name="fractype" onchange="changeFunc();">
                         <option value="Mandelbrot" selected>Mandelbrot</option>
                         <option value="Julia">Julia</option>
+                        <option value="Demo">Demo</option>
                      </select>
+                  </div>
+                  <div class="form-group" style="display: none" id="cr">
+                     <label>cr:
+                     </label>
+                     <input type="number" name="cr" min="-1" max="1" step="0.00001" value="-0.70176">
+                  </div>
+                  <div class="form-group" style="display: none" id="ci">
+                     <label>ci:
+                     </label>
+                     <input type="number" name="ci" min="-1" max="1" step="0.00001" value="-0.3842">
                   </div>
                   <div class="form-group">
                      <label>Resolution: </label>
@@ -116,10 +139,8 @@
                </form>
             </div>
             <div align="right">
-
-                <div id="fracimg">
-
-              </div>
+               <div id="fracimg">
+               </div>
             </div>
          </div>
       </div>

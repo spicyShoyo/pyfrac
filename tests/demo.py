@@ -6,13 +6,13 @@ import uuid
 import os
 os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1' #output warnings
 
-MAX_ITER = 100
+MAX_ITER = 880
 RGB_LEN = 3
 
-class Julia:
-    def __init__(self, row_res, col_res, x_min, x_max, y_min, y_max, cr, ci):
+class Demo:
+    def __init__(self, row_res, col_res, x_min, x_max, y_min, y_max):
         '''
-        Init julia
+        Init juliaset
         :param row_res: the height of the output image
         :param col_res: the width of the output image
         :param x_min: the x coordinate of the left most pixel
@@ -26,24 +26,23 @@ class Julia:
         self.col_length = col_res
         self.row_length = row_res
 
+        x_min = (x_min + 1) * 512
+        x_max = (x_max + 1) * 512
+        y_min = (y_min + 1) * 512
+        y_max = (y_max + 1) * 512
         self.x_min = x_min
         self.y_min = y_min
-
-        self.cr = cr
-        self.ci = ci
 
         self.col_step = float((y_max - y_min)) / self.col_length
         self.row_step = float((x_max - x_min)) / self.row_length
 
-        self.info = np.zeros(8).astype(np.float32)
+        self.info = np.zeros(6).astype(np.float32)
         self.info[0] = self.x_min
         self.info[1] = self.y_min
         self.info[2] = self.col_step
         self.info[3] = self.row_step
         self.info[4] = self.col_length
         self.info[5] = self.max_iter
-        self.info[6] = self.cr
-        self.info[7] = self.ci
 
     def solve(self):
         '''
@@ -73,11 +72,11 @@ class Julia:
             int gid = get_global_id(0);
             int cid = gid % width;
             int rid = width - gid / width - 1;
-            double zr = (info_g[0] + info_g[2] * cid);
-            double zi = (info_g[1] + info_g[3] * rid);
+            double zr = 0;
+            double zi = 0;
 
-            double cr = info_g[6];
-            double ci = info_g[7];
+            double cr = (info_g[0] + info_g[2] * cid) * 8e-9+.356888;
+            double ci = (info_g[1] + info_g[3] * rid) * 8e-9-.645411;
 
             bool over = 0;  //over
             bool assigned = 0;
@@ -93,7 +92,7 @@ class Julia:
                 zr = new_zr;
                 res = zr * zr + zi * zi;
 
-                over = ((res) >= 2);
+                over = ((res) >= 4);
                 do_assign = over & (!assigned);
                 int first = 0;
                 int second = 0;
@@ -104,15 +103,14 @@ class Julia:
                 ret = (first) | second;
                 assigned = assigned | do_assign;
             }
-            double r_f = 255 * __cl_pow((double)(ret)/(max_iter + 1), (double)3);
-            double g_f = 255 * __cl_pow((double)(ret)/(max_iter + 1), (double)0.7);
-            double b_f = 255 * __cl_pow((double)(ret)/(max_iter + 1), (double)0.5);
+            double r_f = 255 * __cl_pow((double)(ret-80)/880, (double)3);
+            double g_f = 255 * __cl_pow((double)(ret-80)/880, (double)0.7);
+            double b_f = 255 * __cl_pow((double)(ret-80)/880, (double)0.5);
             int r_i = (int)r_f;
             int g_i = (int)g_f;
             int b_i = (int)b_f;
 
             res_g[gid * 3] = 255 - r_i;
-            //res_g[gid * 3] = ret;
             res_g[gid * 3 + 1] = 255- g_i;
             res_g[gid * 3 + 2] = 255 - b_i;
         }
@@ -121,7 +119,6 @@ class Julia:
         prg.sum(queue, (self.img.shape[0] // RGB_LEN,), None, res_g, info_g)
         #copy back result
         cl.enqueue_copy(queue, self.img, res_g)
-
 
     def save_img(self):
         '''

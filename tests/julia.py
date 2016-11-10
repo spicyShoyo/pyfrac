@@ -10,7 +10,7 @@ MAX_ITER = 100
 RGB_LEN = 3
 
 class Julia:
-    def __init__(self, row_res, col_res, x_min, x_max, y_min, y_max, cr, ci):
+    def __init__(self, row_res, col_res, x_min, x_max, y_min, y_max):
         '''
         Init julia
         :param row_res: the height of the output image
@@ -29,21 +29,16 @@ class Julia:
         self.x_min = x_min
         self.y_min = y_min
 
-        self.cr = cr
-        self.ci = ci
-
         self.col_step = float((y_max - y_min)) / self.col_length
         self.row_step = float((x_max - x_min)) / self.row_length
 
-        self.info = np.zeros(8).astype(np.float32)
+        self.info = np.zeros(6).astype(np.float32)
         self.info[0] = self.x_min
         self.info[1] = self.y_min
         self.info[2] = self.col_step
         self.info[3] = self.row_step
         self.info[4] = self.col_length
         self.info[5] = self.max_iter
-        self.info[6] = self.cr
-        self.info[7] = self.ci
 
     def solve(self):
         '''
@@ -76,8 +71,8 @@ class Julia:
             double zr = (info_g[0] + info_g[2] * cid);
             double zi = (info_g[1] + info_g[3] * rid);
 
-            double cr = info_g[6];
-            double ci = info_g[7];
+            double cr = -0.70176;
+            double ci = -0.3842;
 
             bool over = 0;  //over
             bool assigned = 0;
