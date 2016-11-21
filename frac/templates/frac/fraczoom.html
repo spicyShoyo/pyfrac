@@ -73,6 +73,36 @@
    <div class="sidebar-nav-fixed pull-right affix">
       <div class="well">
          <script>
+            function save() {
+               var zoomFrac = $("#zoomfrac");
+              if(localStorage.getItem("username")) {
+                var paramObj = {};
+                $.each(zoomFrac.serializeArray(), function(_, kv) {
+                    paramObj[kv.name] = kv.value;
+                });
+                paramObj['username'] = localStorage.getItem("username");
+                $.post("http://localhost:8000/frac/addimg/",
+                    paramObj,
+                    function(data, status) {
+                        if(status == "success") {
+                            alert("Added!")
+                        }else {
+                            alert("Sth wrong with the server")
+                        }
+                    });
+
+             }else {
+               alert("Please sign in!")
+             }
+            }
+            function zoom() {
+              var typeField = $("#typefield");
+              typeField.val("zoom");
+            }
+            function gif() {
+              var typeField = $("#typefield");
+              typeField.val("gif");
+            }
             $(document).ready(function() {
                var zoomFrac = $("#zoomfrac");
                zoomFrac.submit(function(ev) {
@@ -80,6 +110,7 @@
                    $.each(zoomFrac.serializeArray(), function(_, kv) {
                        paramObj[kv.name] = kv.value;
                    });
+                   console.log(paramObj['typefield']);
                    $('#fracimg').html("");
                    $.post("http://localhost:8000/frac/getfrac/",
                        paramObj,
@@ -99,6 +130,7 @@
             <input type="hidden" name="fractype" value="{{frac_type}}">
             <input type="hidden" name="cr" value="{{cr}}">
             <input type="hidden" name="ci" value="{{ci}}">
+            <input type="hidden" name="img_src" value="{{img_src}}">
             <div class="form-group">
                <label>Width: </label>
                <label id="w">-</label>
@@ -129,9 +161,15 @@
                <label id="y2">-</label>
                <input type="hidden" name="ymax" id="y2v" value="1">
             </div>
-            <button type="submit" class="btn btn-success">Zoom!</button>
+            <div class="form-group">
+               <input type="hidden" name="typefield" id="typefield" value="zoom">
+            </div>
+            <button type="submit" class="btn btn-success" onclick="zoom()">Zoom!</button>
+            <button type="submit" class="btn btn-success" onclick="gif()">GIF!</button>
          </form>
+
       </div>
+      <button class="btn btn-info" onclick="save()">Save!</button>
    </div>
 </div>
 <div class="col-sm-8" align="left">

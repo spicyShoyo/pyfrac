@@ -1,0 +1,10 @@
+{% load static %}
+{% static "" as baseUrl %}
+{% for cur_img in img_list %}
+<div class="well">
+<h2>{{cur_img.img_type}}</h2>
+<div align="center">
+<img src="{{ baseUrl }}{{cur_img.img_src}}"></img>
+</div>
+</div>
+{% endfor %}

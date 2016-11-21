@@ -48,27 +48,25 @@
             <div class="col-sm-2 sidenav">
                <h4>Menu</h4>
                <ul class="nav nav-pills nav-stacked">
-                  <li class="active"><a href="/frac/query/">Fractal</a></li>
-                  <li><a href="/frac/noise/">Noise</a></li>
+                  <li ><a href="/frac/query/">Fractal</a></li>
+                  <li class="active"><a href="/frac/noise/">Noise</a></li>
                   <li><a href="/frac/saved/">Saved</a></li>
                </ul>
                <br>
                <script>
                   $(document).ready(function() {
-                     var frm = $("#queryfrac");
+                     var frm = $("#querynoise");
                      frm.submit(function(ev) {
                          var paramObj = {};
                          $.each(frm.serializeArray(), function(_, kv) {
                              paramObj[kv.name] = kv.value;
                          });
-                         paramObj["xres"] = paramObj["res"];
-                         paramObj["yres"] = paramObj["res"];
-                         $('#fracimg').html("");
-                         $.post("http://localhost:8000/frac/getfrac/",
+                         $('#noiseimg').html("");
+                         $.post("http://localhost:8000/frac/getnoi/",
                              paramObj,
                              function(data, status) {
                                  if(status == "success") {
-                                     $('#fracimg').html(data);
+                                     $('#noiseimg').html(data);
                                  }else {
                                      alert("Sth wrong with the server")
                                  }
@@ -79,63 +77,56 @@
                </script>
                <script>
                   function changeFunc() {
-                    var selectBox = document.getElementById("fracselect");
+                    var selectBox = document.getElementById("noiseselect");
                     var selectedValue = selectBox.options[selectBox.selectedIndex].value;
-                    if (selectedValue == "Julia") {
-                      $('#cr').show();
-                      $('#ci').show();
-                    } else {
-                      $('#cr').hide();
-                      $('#ci').hide();
+                    if (selectedValue == "Blur") {
+                      $('#res').show();
+                      $('#smoothp').show();
+                      $('#n').hide();
+                      $('#smoothd').hide();
+                    }else if (selectedValue == "Perlin"){
+                      $('#res').show();
+                      $('#smoothp').hide();
+                      $('#n').hide();
+                      $('#smoothd').hide();
                     }
-
+                     else {
+                      $('#res').hide();
+                      $('#smoothp').hide();
+                      $('#n').show();
+                      $('#smoothd').show();
+                    }
                   }
                </script>
-               <form id="queryfrac" method="post">
+               <form id="querynoise" method="post">
                   {%csrf_token %}
                   <div class="form-group">
                      <label>Type: </label>
-                     <select id="fracselect" name="fractype" onchange="changeFunc();">
-                        <option value="Mandelbrot" selected>Mandelbrot</option>
-                        <option value="Julia">Julia</option>
-                        <option value="BurningShip">BurningShip</option>
-                        <option value="Demo">Demo</option>
+                     <select id="noiseselect" name="noisetype" onchange="changeFunc();">
+                        <option value="Blur" selected>Blur</option>
+                        <option value="Perlin">Perlin</option>
+                        <option value="Diamondsquare">Diamondsquare</option>
                      </select>
                   </div>
-                  <div class="form-group" style="display: none" id="cr">
-                     <label>cr:
-                     </label>
-                     <input type="number" name="cr" min="-1" max="1" step="0.00001" value="-0.70176">
-                  </div>
-                  <div class="form-group" style="display: none" id="ci">
-                     <label>ci:
-                     </label>
-                     <input type="number" name="ci" min="-1" max="1" step="0.00001" value="-0.3842">
-                  </div>
-                  <div class="form-group">
+                  <div class="form-group" id="res">
                      <label>Resolution: </label>
                      <input type="number" name="res"
                         min="100" max="2000" step="100" value="100">
                   </div>
-                  <div class="form-group">
-                     <label>X Min: </label>
-                     <input type="number" name="xmin"
-                        min="-2" max="0" step="0.1" value="-1">
+                  <div class="form-group" id="smoothp">
+                     <label>Smoothness: </label>
+                     <input type="number" name="smoothp"
+                        min="0" max="5" step="1" value="1">
                   </div>
-                  <div class="form-group">
-                     <label>X Max: </label>
-                     <input type="number" name="xmax"
-                        min="0" max="2" step="0.1" value="1">
+                  <div class="form-group" style="display: none" id="n">
+                     <label>n:
+                     </label>
+                     <input type="number" name="n" min="1" max="11" step="1" value="5">
                   </div>
-                  <div class="form-group">
-                     <label>Y Min: </label>
-                     <input type="number" name="ymin"
-                        min="-2" max="0" step="0.1" value="-1">
-                  </div>
-                  <div class="form-group">
-                     <label>Y Max: </label>
-                     <input type="number" name="ymax"
-                        min="0" max="2" step="0.1" value="1">
+                  <div class="form-group" style="display: none" id="smoothd">
+                     <label>Smoothness: </label>
+                     <input type="number" name="smoothd"
+                        min="0.5" max="1.0" step="0.1" value="0.7">
                   </div>
                   <div class="form-group">
                      <input type="hidden" name="typefield" value="zoom">
@@ -143,8 +134,8 @@
                   <button type="submit" class="btn btn-success">Submit</button>
                </form>
             </div>
-            <div align="right">
-               <div id="fracimg">
+            <div align="center">
+               <div id="noiseimg">
                </div>
             </div>
             <script>
@@ -235,6 +226,7 @@
                   <button id="logout" class="btn btn-danger" onclick="logout()">Log Out</button>
                </div>
             </div>
+
          </div>
       </div>
       <footer class="container-fluid">

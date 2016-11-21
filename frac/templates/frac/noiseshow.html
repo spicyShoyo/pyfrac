@@ -1,0 +1,38 @@
+{% load static %}
+{% static "" as baseUrl %}
+<div class="col-sm-2" align="left" float="left">
+   <div class="sidebar-nav-fixed pull-right affix">
+      <div class="well">
+        <button class="btn btn-info" onclick="save()">Save!</button>
+      </div>
+    </div>
+  </div>
+<img src="{{ baseUrl }}{{img_src}}"></img>
+<script>
+function save() {
+   var zoomFrac = $("#zoomfrac");
+  if(localStorage.getItem("username")) {
+    var paramObj = {};
+    $.each(zoomFrac.serializeArray(), function(_, kv) {
+        paramObj[kv.name] = kv.value;
+    });
+    paramObj['username'] = localStorage.getItem("username");
+    $.post("http://localhost:8000/frac/addimg/",
+        paramObj,
+        function(data, status) {
+            if(status == "success") {
+                alert("Added!")
+            }else {
+                alert("Sth wrong with the server")
+            }
+        });
+
+ }else {
+   alert("Please sign in!")
+ }
+}</script>
+<form id="zoomfrac" method="post">
+   <input type="hidden" name="csrfmiddlewaretoken" value="{{token}}">
+   <input type="hidden" name="img_src" value="{{img_src}}">
+   <input type="hidden" name="noisetype" value="{{noisetype}}">
+ </form>

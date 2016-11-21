@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <title>Bootstrap Example</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <link rel="stylesheet" type="text/css" href="{% static "imageselect/css/imgareaselect-default.css" %}" />
+      <script type="text/javascript" src="{% static "imageselect/scripts/jquery.imgareaselect.pack.js" %}"></script>
+      <style>
+         /* Set height of the grid so .sidenav can be 100% (adjust if needed) */
+         .row.content {height: 1500px}
+         /* Set gray background color and 100% height */
+         .sidenav {
+         background-color: #f1f1f1;
+         height: 100%;
+         }
+         /* Set black background color, white text and some padding */
+         footer {
+         background-color: #555;
+         color: white;
+         padding: 15px;
+         }
+         /* On small screens, set height to 'auto' for sidenav and grid */
+         @media screen and (max-width: 767px) {
+         .sidenav {
+         height: auto;
+         padding: 15px;
+         }
+         .row.content {height: auto;}
+         }
+         .vcenter {
+         display: inline-block;
+         vertical-align: middle;
+         float: none;
+         }
+      </style>
+   </head>
+   <body onload="checkSession();">
+      <nav class="navbar navbar-inverse">
+         <a class="navbar-brand" href="#">PyFrac</a>
+      </nav>
+      <div class="container-fluid">
+         <div class="row content">
+            <div class="col-sm-2 sidenav">
+               <h4>Menu</h4>
+               <ul class="nav nav-pills nav-stacked">
+                  <li><a href="/frac/query/">Fractal</a></li>
+                  <li><a href="/frac/noise/">Noise</a></li>
+                  <li class="active"><a href="/frac/saved/">Saved</a></li>
+               </ul>
+               <br>
+
+            </div>
+            <div align="right">
+               <div class="col-sm-8" align="left" float="left">
+                 <div id="fracimg">
+                 </div>
+               </div>
+               <div class="col-sm-2" align="left">
+                  <div align="right">
+
+                     <script>
+                     function requestImg() {
+                        var frm = $("#signin");
+                           var paramObj = {};
+                           $.each(frm.serializeArray(), function(_, kv) {
+                               paramObj[kv.name] = kv.value;
+                           })
+                           paramObj['username'] = localStorage.getItem("username");
+                           console.log(paramObj)
+                           $('#fracimg').html("");
+                           $.post("http://localhost:8000/frac/imgset/",
+                               paramObj,
+                               function(data, status) {
+                                   if(status == "success") {
+                                      $('#fracimg').html(data);
+                                   }else {
+                                       alert("Sth wrong with the server");
+                                   }
+                               });
+                     }
+                     function sessionOn() {
+                       $('#signin').hide();
+                       $('#logout').show();
+                       $('#greeting').html("Hi, " + localStorage.getItem("username"));
+                       $('#username').val(localStorage.getItem("username"));
+                       requestImg();
+                     }
+                     function sessionOff() {
+                       $('#logout').hide();
+                       $("#usernameinput").val("");
+                       $("#passwordinput").val("");
+                       $('#signin').show();
+                         localStorage.clear();
+                         $('#greeting').html("");
+                         $('#username').val("")
+                         $('#fracimg').html("");
+                     }
+                     function logout() {
+                       sessionOff();
+                     }
+                     function checkSession() {
+                       if(localStorage.getItem("username")) {
+                         sessionOn();
+                      }else {
+                        sessionOff();
+                      }
+                     }
+                        function login() {
+                          var actiontype = $("#actiontype");
+                          actiontype.val("login");
+                        }
+                        function signup() {
+                          var actiontype = $("#actiontype");
+                          actiontype.val("signup");
+                        }
+
+                        $(document).ready(function() {
+                          var frm = $("#signin");
+                          frm.submit(function(ev) {
+                              var paramObj = {};
+                              $.each(frm.serializeArray(), function(_, kv) {
+                                  paramObj[kv.name] = kv.value;
+                              });
+
+
+                              $('#fracimg').html("");
+                              $.post("http://localhost:8000/frac/signin/",
+                                  paramObj,
+                                  function(data, status) {
+                                      if(status == "success") {
+                                         if(data == "<p>True</p>") {
+                                           localStorage.setItem("username", paramObj['username']);
+                                            sessionOn();
+                                         }else {
+                                           sessionOff();
+                                           alert("Invalid username or password.");
+                                         }
+
+                                      }else {
+                                          alert("Sth wrong with the server");
+                                      }
+                                  });
+                              ev.preventDefault();
+                          });
+                        });
+                     </script>
+                     <div align="left" class="sidebar-nav-fixed pull-right">
+                        <div class="well">
+                           <h3 id="greeting"></h3>
+                           <input id="username" type="hidden" value="">
+                           <form id="signin" method="post">
+                              {%csrf_token %}
+                              <div class="form-group">
+                                 <h3>Username: </h3>
+                                 <input id="usernameinput" type="text" name="username">
+                              </div>
+                              <div class="form-group">
+                                 <h3>Password: </h3>
+                                 <input id="passwordinput" type="password" type="text" name="password">
+                              </div>
+                              <div class="form-group">
+                                 <input type="hidden" name="actiontype" id="actiontype" value="zoom">
+                              </div>
+                              <button type="submit" class="btn btn-success" onclick="login()">Log In</button>
+                              <button type="submit" class="btn btn-success" onclick="signup()">Sign Up</button>
+                           </form>
+                           <button id="logout" class="btn btn-danger" onclick="logout()">Log Out</button>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- <div class="frame" style="margin: 0 0.3em; width: 300px; height: 300px;">
+                     <img id="photo" src="{{ baseUrl }}{{img_src}}">
+                     </div> -->
+               </div>
+            </div>
+         </div>
+      </div>
+      <footer class="container-fluid">
+         <p>Footer Text</p>
+      </footer>
+   </body>
+</html>
