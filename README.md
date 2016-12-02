@@ -9,6 +9,6 @@ Run server:
 >python manage.py runserver
 
 
-On browser:
+Then in browser:
 
 >localhost:8000/frac/query/
